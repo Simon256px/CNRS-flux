@@ -57,6 +57,15 @@ export function SiteFooter() {
       </span>
       <span>Données : flux RSS publics du CNRS</span>
       <span>
+        <a
+          href="https://github.com/imocourtois/CNRS-flux"
+          target="_blank"
+          rel="noopener"
+        >
+          Code source — GitHub ↗
+        </a>
+      </span>
+      <span>
         Propulsé par{" "}
         <a href="https://deno.com" target="_blank" rel="noopener">Deno 2</a>
         {" / "}
