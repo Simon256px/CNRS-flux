@@ -1,5 +1,7 @@
 # CNRS//FLUX
 
+**🌐 Site en ligne : <https://cnrs-flux.imocourtois.deno.net>**
+
 Agrégateur d'actualité scientifique du CNRS — instituts, délégations régionales
 et CNRS Le Journal — collectée automatiquement, indexée dans Deno KV,
 recherchable et filtrable.

@@ -54,5 +54,13 @@
       "noscript",
       "template"
     ]
+  },
+  "deploy": {
+    "org": "imocourtois",
+    "app": "cnrs-flux"
   }
 }
+
+
+
+

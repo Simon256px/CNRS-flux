@@ -19,12 +19,19 @@ export function registerCron(): void {
   });
 
   // Collecte initiale en arrière-plan si les données sont vides ou périmées.
+  // Ne doit jamais faire échouer le démarrage du serveur (KV indisponible…).
   queueMicrotask(async () => {
-    const metas = await listFeedMeta();
-    const lastFetch = Math.max(0, ...metas.map((m) => m.lastFetchAt));
-    if (Date.now() - lastFetch > STALE_AFTER_MS) {
-      console.log("[collect] données absentes ou périmées → collecte initiale");
-      await collectAll();
+    try {
+      const metas = await listFeedMeta();
+      const lastFetch = Math.max(0, ...metas.map((m) => m.lastFetchAt));
+      if (Date.now() - lastFetch > STALE_AFTER_MS) {
+        console.log(
+          "[collect] données absentes ou périmées → collecte initiale",
+        );
+        await collectAll();
+      }
+    } catch (error) {
+      console.error("[collect] collecte initiale impossible :", error);
     }
   });
 }
