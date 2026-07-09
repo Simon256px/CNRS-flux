@@ -60,6 +60,23 @@ export async function queryArticles(query: ArticleQuery): Promise<ArticlePage> {
   };
 }
 
+/**
+ * Comptages réels depuis KV (source de vérité). Les compteurs de
+ * `feed_meta` peuvent sous-compter si un isolate est recyclé en pleine
+ * collecte ; on ne s'en sert que pour le journal de collecte.
+ */
+export async function countBySource(): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  for (const article of await allArticles()) {
+    counts.set(article.sourceId, (counts.get(article.sourceId) ?? 0) + 1);
+  }
+  return counts;
+}
+
+export async function countAll(): Promise<number> {
+  return (await allArticles()).length;
+}
+
 /** Valeurs de facettes pour construire les filtres de l'UI. */
 export function facets() {
   const regions = [

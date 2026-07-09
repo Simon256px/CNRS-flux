@@ -3,6 +3,7 @@
  * volumes par source, organismes à venir.
  */
 import { define } from "../utils.ts";
+import { countBySource } from "../lib/feed.ts";
 import { listFeedMeta } from "../lib/kv.ts";
 import { ACTIVE_SOURCES, ORGANIZATIONS } from "../collector/sources.ts";
 import type { FeedMeta, Source, SourceKind } from "../lib/types.ts";
@@ -16,10 +17,12 @@ import { Nav, SiteFooter, TopBar } from "../components/Chrome.tsx";
 
 export const handler = define.handlers({
   async GET(ctx) {
-    const metas = new Map(
-      (await listFeedMeta()).map((m) => [m.sourceId, m]),
-    );
-    return ctx.render(<SourcesPage metas={metas} />);
+    const [metaList, counts] = await Promise.all([
+      listFeedMeta(),
+      countBySource(),
+    ]);
+    const metas = new Map(metaList.map((m) => [m.sourceId, m]));
+    return ctx.render(<SourcesPage metas={metas} counts={counts} />);
   },
 });
 
@@ -33,7 +36,9 @@ const GROUP_LABEL: Record<SourceKind, string> = {
   laboratoire: "Laboratoires",
 };
 
-function SourceRow({ source, meta }: { source: Source; meta?: FeedMeta }) {
+function SourceRow(
+  { source, meta, count }: { source: Source; meta?: FeedMeta; count: number },
+) {
   const error = meta?.lastStatus === "error";
   return (
     <a
@@ -57,7 +62,7 @@ function SourceRow({ source, meta }: { source: Source; meta?: FeedMeta }) {
       </span>
       <span class="meta">
         <div>
-          <span class="n">{meta?.total ?? 0}</span> art.
+          <span class="n">{count}</span> art.
         </div>
         <div>
           {error
@@ -73,7 +78,12 @@ function SourceRow({ source, meta }: { source: Source; meta?: FeedMeta }) {
   );
 }
 
-function SourcesPage({ metas }: { metas: Map<string, FeedMeta> }) {
+function SourcesPage(
+  { metas, counts }: {
+    metas: Map<string, FeedMeta>;
+    counts: Map<string, number>;
+  },
+) {
   return (
     <div class="wrap">
       <TopBar />
@@ -93,6 +103,7 @@ function SourcesPage({ metas }: { metas: Map<string, FeedMeta> }) {
                   key={source.id}
                   source={source}
                   meta={metas.get(source.id)}
+                  count={counts.get(source.id) ?? 0}
                 />
               ))}
             </div>

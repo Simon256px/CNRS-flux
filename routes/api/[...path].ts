@@ -10,7 +10,12 @@
  */
 import { Hono } from "@hono/hono";
 import { define } from "../../utils.ts";
-import { facets, queryArticles } from "../../lib/feed.ts";
+import {
+  countAll,
+  countBySource,
+  facets,
+  queryArticles,
+} from "../../lib/feed.ts";
 import { listFeedMeta } from "../../lib/kv.ts";
 import { ACTIVE_SOURCES, ORGANIZATIONS } from "../../collector/sources.ts";
 import { collectAll } from "../../collector/rss.ts";
@@ -35,13 +40,16 @@ api.get("/articles", async (c) => {
 });
 
 api.get("/sources", async (c) => {
-  const metas = new Map(
-    (await listFeedMeta()).map((m) => [m.sourceId, m]),
-  );
+  const [metaList, counts] = await Promise.all([
+    listFeedMeta(),
+    countBySource(),
+  ]);
+  const metas = new Map(metaList.map((m) => [m.sourceId, m]));
   return c.json({
     organizations: ORGANIZATIONS,
     sources: ACTIVE_SOURCES.map((s) => ({
       ...s,
+      count: counts.get(s.id) ?? 0,
       meta: metas.get(s.id) ?? null,
     })),
     facets: facets(),
@@ -49,11 +57,10 @@ api.get("/sources", async (c) => {
 });
 
 api.get("/stats", async (c) => {
-  const metas = await listFeedMeta();
-  const total = metas.reduce((sum, m) => sum + m.total, 0);
+  const [metas, articles] = await Promise.all([listFeedMeta(), countAll()]);
   const lastFetchAt = Math.max(0, ...metas.map((m) => m.lastFetchAt));
   return c.json({
-    articles: total,
+    articles,
     sources: ACTIVE_SOURCES.length,
     organizations: ORGANIZATIONS.filter((o) => o.enabled).length,
     errors: metas.filter((m) => m.lastStatus === "error").length,
