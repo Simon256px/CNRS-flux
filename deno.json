@@ -1,5 +1,6 @@
 {
   "nodeModulesDir": "manual",
+  "unstable": ["kv", "cron"],
   "tasks": {
     "check": "deno fmt --check . && deno lint . && deno check",
     "dev": "deno run -A --unstable-kv --unstable-cron --watch=static/,routes/ dev.ts",
