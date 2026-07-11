@@ -6,7 +6,7 @@
 import { define } from "../utils.ts";
 import { facets, queryArticles } from "../lib/feed.ts";
 import { listFeedMeta } from "../lib/kv.ts";
-import { ACTIVE_SOURCES } from "../collector/sources.ts";
+import { ACTIVE_SOURCES, ORGANIZATIONS } from "../collector/sources.ts";
 import {
   formatDate,
   formatTime,
@@ -64,7 +64,7 @@ function Home({ initial, lastFetchAt, errors }: HomeProps) {
           </h1>
           <p class="tagline">
             <span class="dot">●</span>{" "}
-            L'actualité scientifique française — collectée, indexée, en continu
+            L'actualité de la recherche — CNRS · Inserm · Inria · CEA · CERN
           </p>
         </div>
 
@@ -99,6 +99,10 @@ function Home({ initial, lastFetchAt, errors }: HomeProps) {
       <NewsExplorer
         initial={initial}
         sources={sources}
+        orgs={ORGANIZATIONS.filter((o) => o.enabled).map((o) => ({
+          id: o.id,
+          name: o.name,
+        }))}
         regions={regions}
         themes={themes}
       />

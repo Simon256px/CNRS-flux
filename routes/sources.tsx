@@ -29,7 +29,7 @@ export const handler = define.handlers({
 const GROUPS: SourceKind[] = ["national", "journal", "institut", "delegation"];
 
 const GROUP_LABEL: Record<SourceKind, string> = {
-  national: "Flux national",
+  national: "Flux nationaux",
   journal: "CNRS Le Journal",
   institut: "Instituts thématiques",
   delegation: "Délégations régionales",

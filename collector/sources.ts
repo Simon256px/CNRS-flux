@@ -14,25 +14,30 @@ export const ORGANIZATIONS: Organization[] = [
     fullName: "Centre national de la recherche scientifique",
     enabled: true,
   },
-  // Extensions prévues — passer enabled à true et déclarer leurs sources.
   {
     id: "inserm",
     name: "Inserm",
     fullName: "Institut national de la santé et de la recherche médicale",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "inria",
     name: "Inria",
     fullName:
       "Institut national de recherche en sciences et technologies du numérique",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "cea",
     name: "CEA",
     fullName: "Commissariat à l'énergie atomique et aux énergies alternatives",
-    enabled: false,
+    enabled: true,
+  },
+  {
+    id: "cern",
+    name: "CERN",
+    fullName: "Organisation européenne pour la recherche nucléaire",
+    enabled: true,
   },
 ];
 
@@ -41,6 +46,7 @@ export const THEMES = [
   "Biologie",
   "Chimie",
   "Écologie & environnement",
+  "Énergie",
   "Ingénierie",
   "Mathématiques",
   "Numérique",
@@ -72,8 +78,12 @@ export const THEME_ALIASES: Record<string, string> = {
   "histoire": "Sciences humaines & sociales",
   "numérique": "Numérique",
   "informatique": "Numérique",
+  "intelligence artificielle": "Numérique",
   "mathématiques": "Mathématiques",
   "ingénierie": "Ingénierie",
+  "énergie": "Énergie",
+  "énergies": "Énergie",
+  "défense & sécurité": "Ingénierie",
 };
 
 interface SourceSpec {
@@ -343,6 +353,64 @@ export const SOURCES: Source[] = [
   // avec region + themes. Exemple :
   // cnrs({ id: "lab-xxx", kind: "laboratoire", name: "…", shortName: "…",
   //        host: "www.xxx.cnrs.fr", region: "…", themes: ["…"] }),
+
+  // ── Autres organismes ───────────────────────────────────────────────────
+  {
+    id: "inserm",
+    org: "inserm",
+    kind: "national",
+    name: "Inserm — Actualités",
+    shortName: "INSERM",
+    homepage: "https://www.inserm.fr",
+    feedUrl: "https://www.inserm.fr/feed/",
+    themes: ["Biologie"],
+    enabled: true,
+  },
+  {
+    id: "inserm-presse",
+    org: "inserm",
+    kind: "national",
+    name: "Inserm — Salle de presse",
+    shortName: "INSERM PRESSE",
+    homepage: "https://presse.inserm.fr",
+    feedUrl: "https://presse.inserm.fr/feed/",
+    themes: ["Biologie"],
+    enabled: true,
+  },
+  {
+    id: "inria",
+    org: "inria",
+    kind: "national",
+    name: "Inria — Actualités",
+    shortName: "INRIA",
+    homepage: "https://www.inria.fr/fr",
+    feedUrl: "https://www.inria.fr/fr/rss.xml",
+    themes: ["Numérique"],
+    enabled: true,
+  },
+  {
+    id: "cea",
+    org: "cea",
+    kind: "national",
+    name: "CEA — Presse & médias",
+    shortName: "CEA",
+    homepage: "https://www.cea.fr/presse",
+    feedUrl:
+      "https://www.cea.fr/presse/_layouts/15/i2i/web/ceasrchrss.ashx?pid=9&wid=g_f5b1fb1e_16a3_42ba_a2fe_fb25fb65577b",
+    themes: ["Énergie", "Physique"],
+    enabled: true,
+  },
+  {
+    id: "cern",
+    org: "cern",
+    kind: "national",
+    name: "CERN — Actualités",
+    shortName: "CERN",
+    homepage: "https://home.cern/fr",
+    feedUrl: "https://home.cern/fr/feed/",
+    themes: ["Physique"],
+    enabled: true,
+  },
 ];
 
 export const ACTIVE_SOURCES: Source[] = SOURCES.filter((s) => s.enabled);

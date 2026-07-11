@@ -9,7 +9,7 @@ export default define.page(function App({ Component }) {
         <title>CNRS//FLUX — Agrégateur d'actualité scientifique</title>
         <meta
           name="description"
-          content="Toute l'actualité scientifique du CNRS — instituts, délégations régionales et CNRS Le Journal — agrégée, recherchable et filtrable."
+          content="L'actualité de la recherche française et européenne — CNRS, Inserm, Inria, CEA, CERN — agrégée, recherchable et filtrable."
         />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link

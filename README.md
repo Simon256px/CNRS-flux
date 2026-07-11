@@ -2,9 +2,9 @@
 
 **🌐 Site en ligne : <https://cnrs-flux.simon256px.deno.net>**
 
-Agrégateur d'actualité scientifique du CNRS — instituts, délégations régionales
-et CNRS Le Journal — collectée automatiquement, indexée dans Deno KV,
-recherchable et filtrable.
+Agrégateur d'actualité scientifique — CNRS (instituts, délégations régionales,
+Le Journal), Inserm, Inria, CEA et CERN — collectée automatiquement, indexée
+dans Deno KV, recherchable et filtrable.
 
 **100 % écosystème Deno** : Deno 2, [Fresh 2](https://fresh.deno.dev) (SSR +
 islands), [Hono](https://hono.dev) (API), Deno KV (stockage), `Deno.cron()`
@@ -78,7 +78,9 @@ static/         CSS, fontes auto-hébergées, favicon
 | `GET /api/stats`    | Compteurs globaux, dernière synchro, planification                 |
 | `POST /api/collect` | Déclenche une collecte manuelle                                    |
 
-## Sources suivies (28)
+## Sources suivies (33)
+
+**CNRS (28 flux)**
 
 - **National** : actualités cnrs.fr
 - **CNRS Le Journal** (rubriques mappées vers les thèmes)
@@ -88,6 +90,13 @@ static/         CSS, fontes auto-hébergées, favicon
   Limousin Poitou-Charentes, Côte d'Azur, Hauts-de-France, Île-de-France (Gif,
   Meudon, Villejuif), Normandie, Occitanie Est/Ouest, Paris-Centre, Provence et
   Corse, Rhône Auvergne
+
+**Autres organismes (5 flux)**
+
+- **Inserm** : actualités + salle de presse
+- **Inria** : actualités
+- **CEA** : presse & médias
+- **CERN** : actualités (édition française)
 
 ## Étendre l'agrégateur
 

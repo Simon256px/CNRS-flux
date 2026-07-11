@@ -21,24 +21,26 @@ const KIND_TABS: { value: "" | SourceKind; label: string }[] = [
 export interface NewsExplorerProps {
   initial: ArticlePage;
   sources: SourceRef[];
+  orgs: { id: string; name: string }[];
   regions: string[];
   themes: string[];
 }
 
 export default function NewsExplorer(
-  { initial, sources, regions, themes }: NewsExplorerProps,
+  { initial, sources, orgs, regions, themes }: NewsExplorerProps,
 ) {
   const [articles, setArticles] = useState<Article[]>(initial.articles);
   const [total, setTotal] = useState(initial.total);
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState("");
+  const [org, setOrg] = useState("");
   const [kind, setKind] = useState<"" | SourceKind>("");
   const [source, setSource] = useState("");
   const [region, setRegion] = useState("");
   const [theme, setTheme] = useState("");
 
   const sourceById = new Map(sources.map((s) => [s.id, s]));
-  const filtered = Boolean(q || kind || source || region || theme);
+  const filtered = Boolean(q || org || kind || source || region || theme);
 
   const skipFirst = useRef(true);
   const abortRef = useRef<AbortController | null>(null);
@@ -54,6 +56,7 @@ export default function NewsExplorer(
         offset: String(offset),
       });
       if (q) params.set("q", q);
+      if (org) params.set("org", org);
       if (kind) params.set("kind", kind);
       if (source) params.set("source", source);
       if (region) params.set("region", region);
@@ -84,10 +87,11 @@ export default function NewsExplorer(
     }
     const timer = setTimeout(() => load(0, false), q ? 280 : 0);
     return () => clearTimeout(timer);
-  }, [q, kind, source, region, theme]);
+  }, [q, org, kind, source, region, theme]);
 
   function reset() {
     setQ("");
+    setOrg("");
     setKind("");
     setSource("");
     setRegion("");
@@ -120,6 +124,15 @@ export default function NewsExplorer(
               </button>
             ))}
           </div>
+
+          <select
+            value={org}
+            onChange={(e) => setOrg((e.target as HTMLSelectElement).value)}
+            aria-label="Filtrer par organisme"
+          >
+            <option value="">Organisme : tous</option>
+            {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+          </select>
 
           <select
             value={source}
