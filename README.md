@@ -10,6 +10,8 @@ recherchable et filtrable.
 islands), [Hono](https://hono.dev) (API), Deno KV (stockage), `Deno.cron()`
 (collecte planifiée), packages JSR.
 
+<img width="1346" height="948" alt="flux" src="https://github.com/user-attachments/assets/627012ee-4ae2-4729-838a-86f9a6a992d5" />
+
 ## Démarrage
 
 ```sh
