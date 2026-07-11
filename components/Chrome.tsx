@@ -58,7 +58,7 @@ export function SiteFooter() {
       <span>Données : flux RSS publics du CNRS</span>
       <span>
         <a
-          href="https://github.com/imocourtois/CNRS-flux"
+          href="https://github.com/simon256px/CNRS-flux"
           target="_blank"
           rel="noopener"
         >

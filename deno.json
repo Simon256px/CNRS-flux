@@ -56,8 +56,7 @@
     ]
   },
   "deploy": {
-    "org": "imocourtois",
+    "org": "simon256px",
     "app": "cnrs-flux"
   }
 }
-
