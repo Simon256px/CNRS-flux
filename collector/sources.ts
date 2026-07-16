@@ -7,39 +7,71 @@
  */
 import type { Organization, Source, SourceKind } from "../lib/types.ts";
 
-export const ORGANIZATIONS: Organization[] = [
-  {
-    id: "cnrs",
-    name: "CNRS",
-    fullName: "Centre national de la recherche scientifique",
-    enabled: true,
-  },
-  {
-    id: "inserm",
-    name: "Inserm",
-    fullName: "Institut national de la santé et de la recherche médicale",
-    enabled: true,
-  },
-  {
-    id: "inria",
-    name: "Inria",
-    fullName:
-      "Institut national de recherche en sciences et technologies du numérique",
-    enabled: true,
-  },
-  {
-    id: "cea",
-    name: "CEA",
-    fullName: "Commissariat à l'énergie atomique et aux énergies alternatives",
-    enabled: true,
-  },
-  {
-    id: "cern",
-    name: "CERN",
-    fullName: "Organisation européenne pour la recherche nucléaire",
-    enabled: true,
-  },
+/** Déclaration compacte : [id, nom court, nom complet, actif]. */
+const ORG_DEFS: [string, string, string, boolean][] = [
+  ["cnrs", "CNRS", "Centre national de la recherche scientifique", true],
+  [
+    "inserm",
+    "Inserm",
+    "Institut national de la santé et de la recherche médicale",
+    true,
+  ],
+  [
+    "inria",
+    "Inria",
+    "Institut national de recherche en sciences et technologies du numérique",
+    true,
+  ],
+  [
+    "cea",
+    "CEA",
+    "Commissariat à l'énergie atomique et aux énergies alternatives",
+    true,
+  ],
+  ["cern", "CERN", "Organisation européenne pour la recherche nucléaire", true],
+  ["ird", "IRD", "Institut de recherche pour le développement", true],
+  [
+    "gustave-roussy",
+    "Gustave Roussy",
+    "Centre de lutte contre le cancer",
+    true,
+  ],
+  ["meteofrance", "Météo-France", "Établissement public de météorologie", true],
+  ["obspm", "Obs. de Paris", "Observatoire de Paris - PSL", true],
+  ["paris-saclay", "Paris-Saclay", "Université Paris-Saclay", true],
+  ["sorbonne", "Sorbonne", "Sorbonne Université", true],
+  ["futura", "Futura", "Futura Sciences (média)", true],
+  ["conversation", "The Conversation", "The Conversation France (média)", true],
+  // Sans flux RSS d'actualités public exploitable (vérifié juillet 2026) —
+  // flux morts, vides ou inexistants. Passer enabled à true et déclarer la
+  // source si l'un d'eux (re)publie un flux.
+  ["cnes", "CNES", "Centre national d'études spatiales", false],
+  ["pasteur", "Institut Pasteur", "Institut Pasteur", false],
+  [
+    "inrae",
+    "INRAE",
+    "Institut national de recherche pour l'agriculture, l'alimentation et l'environnement",
+    false,
+  ],
+  [
+    "ifremer",
+    "IFREMER",
+    "Institut français de recherche pour l'exploitation de la mer",
+    false,
+  ],
+  ["brgm", "BRGM", "Bureau de recherches géologiques et minières", false],
+  [
+    "anses",
+    "ANSES",
+    "Agence nationale de sécurité sanitaire de l'alimentation, de l'environnement et du travail",
+    false,
+  ],
+  ["curie", "Institut Curie", "Institut Curie", false],
 ];
+
+export const ORGANIZATIONS: Organization[] = ORG_DEFS.map(
+  ([id, name, fullName, enabled]) => ({ id, name, fullName, enabled }),
+);
 
 /** Thèmes scientifiques canoniques utilisés par les filtres. */
 export const THEMES = [
@@ -79,11 +111,18 @@ export const THEME_ALIASES: Record<string, string> = {
   "numérique": "Numérique",
   "informatique": "Numérique",
   "intelligence artificielle": "Numérique",
+  "tech": "Numérique",
   "mathématiques": "Mathématiques",
   "ingénierie": "Ingénierie",
   "énergie": "Énergie",
   "énergies": "Énergie",
   "défense & sécurité": "Ingénierie",
+  "astronomie": "Terre & Univers",
+  "géologie": "Terre & Univers",
+  "météorologie": "Écologie & environnement",
+  "océan": "Écologie & environnement",
+  "médecine": "Biologie",
+  "cancer": "Biologie",
 };
 
 interface SourceSpec {
@@ -110,6 +149,20 @@ function cnrs(spec: SourceSpec): Source {
     region: spec.region,
     themes: spec.themes ?? [],
     enabled: true,
+  };
+}
+
+/** Fabrique générique pour les flux des autres organismes. */
+function src(
+  spec:
+    & Pick<Source, "id" | "org" | "name" | "shortName" | "homepage" | "feedUrl">
+    & Partial<Pick<Source, "kind" | "themes" | "exclude">>,
+): Source {
+  return {
+    kind: "national",
+    themes: [],
+    enabled: true,
+    ...spec,
   };
 }
 
@@ -354,63 +407,127 @@ export const SOURCES: Source[] = [
   // cnrs({ id: "lab-xxx", kind: "laboratoire", name: "…", shortName: "…",
   //        host: "www.xxx.cnrs.fr", region: "…", themes: ["…"] }),
 
-  // ── Autres organismes ───────────────────────────────────────────────────
-  {
+  // ── Autres organismes (flux vérifiés) ───────────────────────────────────
+  src({
     id: "inserm",
     org: "inserm",
-    kind: "national",
     name: "Inserm — Actualités",
     shortName: "INSERM",
     homepage: "https://www.inserm.fr",
     feedUrl: "https://www.inserm.fr/feed/",
     themes: ["Biologie"],
-    enabled: true,
-  },
-  {
+  }),
+  src({
     id: "inserm-presse",
     org: "inserm",
-    kind: "national",
     name: "Inserm — Salle de presse",
     shortName: "INSERM PRESSE",
     homepage: "https://presse.inserm.fr",
     feedUrl: "https://presse.inserm.fr/feed/",
     themes: ["Biologie"],
-    enabled: true,
-  },
-  {
+  }),
+  src({
     id: "inria",
     org: "inria",
-    kind: "national",
     name: "Inria — Actualités",
     shortName: "INRIA",
     homepage: "https://www.inria.fr/fr",
     feedUrl: "https://www.inria.fr/fr/rss.xml",
     themes: ["Numérique"],
-    enabled: true,
-  },
-  {
+  }),
+  src({
     id: "cea",
     org: "cea",
-    kind: "national",
     name: "CEA — Presse & médias",
     shortName: "CEA",
     homepage: "https://www.cea.fr/presse",
     feedUrl:
       "https://www.cea.fr/presse/_layouts/15/i2i/web/ceasrchrss.ashx?pid=9&wid=g_f5b1fb1e_16a3_42ba_a2fe_fb25fb65577b",
     themes: ["Énergie", "Physique"],
-    enabled: true,
-  },
-  {
+  }),
+  src({
     id: "cern",
     org: "cern",
-    kind: "national",
     name: "CERN — Actualités",
     shortName: "CERN",
     homepage: "https://home.cern/fr",
     feedUrl: "https://home.cern/fr/feed/",
     themes: ["Physique"],
-    enabled: true,
-  },
+  }),
+  src({
+    id: "ird",
+    org: "ird",
+    name: "IRD — Actualités",
+    shortName: "IRD",
+    homepage: "https://www.ird.fr",
+    feedUrl: "https://www.ird.fr/rss.xml",
+    themes: ["Écologie & environnement", "Sciences humaines & sociales"],
+  }),
+  src({
+    id: "gustave-roussy",
+    org: "gustave-roussy",
+    name: "Gustave Roussy — Actualités",
+    shortName: "GUSTAVE ROUSSY",
+    homepage: "https://www.gustaveroussy.fr",
+    feedUrl: "https://www.gustaveroussy.fr/fr/rss.xml",
+    themes: ["Biologie"],
+  }),
+  src({
+    id: "meteofrance",
+    org: "meteofrance",
+    name: "Météo-France — Actualités",
+    shortName: "MÉTÉO-FRANCE",
+    homepage: "https://meteofrance.fr",
+    feedUrl: "https://meteofrance.fr/rss.xml",
+    themes: ["Écologie & environnement"],
+  }),
+  src({
+    id: "obspm",
+    org: "obspm",
+    name: "Observatoire de Paris — Actualités",
+    shortName: "OBS. PARIS",
+    homepage: "https://www.observatoiredeparis.psl.eu",
+    feedUrl: "https://www.observatoiredeparis.psl.eu/spip.php?page=backend",
+    themes: ["Terre & Univers"],
+  }),
+  src({
+    id: "paris-saclay",
+    org: "paris-saclay",
+    name: "Université Paris-Saclay — Actualités",
+    shortName: "PARIS-SACLAY",
+    homepage: "https://www.universite-paris-saclay.fr",
+    feedUrl: "https://www.universite-paris-saclay.fr/rss.xml",
+  }),
+  src({
+    id: "sorbonne",
+    org: "sorbonne",
+    name: "Sorbonne Université — Actualités",
+    shortName: "SORBONNE",
+    homepage: "https://www.sorbonne-universite.fr",
+    feedUrl: "https://www.sorbonne-universite.fr/rss.xml",
+  }),
+
+  // ── Médias scientifiques ────────────────────────────────────────────────
+  src({
+    id: "futura",
+    org: "futura",
+    kind: "journal",
+    name: "Futura Sciences",
+    shortName: "FUTURA",
+    homepage: "https://www.futura-sciences.com",
+    feedUrl: "https://www.futura-sciences.com/rss/actualites.xml",
+    // Écarte le contenu sponsorisé (bons plans, soldes…) du flux général.
+    exclude: "bons?-?plans?|no_ads|cdiscount|soldes|black friday|promotion",
+  }),
+  src({
+    id: "conversation",
+    org: "conversation",
+    kind: "journal",
+    name: "The Conversation France",
+    shortName: "THE CONVERSATION",
+    homepage: "https://theconversation.com/fr",
+    feedUrl: "https://theconversation.com/fr/articles.atom",
+  }),
 ];
 
 export const ACTIVE_SOURCES: Source[] = SOURCES.filter((s) => s.enabled);

@@ -1,7 +1,7 @@
 /**
  * Chrome commun du site : barre haute, navigation, pied de page.
  */
-import { ORGANIZATIONS } from "../collector/sources.ts";
+import { ACTIVE_SOURCES, ORGANIZATIONS } from "../collector/sources.ts";
 
 export function TopBar() {
   return (
@@ -34,17 +34,16 @@ export function Nav({ active }: { active: "actualites" | "sources" }) {
       </a>
       <a href="/api/stats" class="navlink">▸ API</a>
       <span class="grow" />
-      {ORGANIZATIONS.map((org) => (
-        <span
-          key={org.id}
-          class={`orgchip ${org.enabled ? "on" : ""}`}
-          title={org.enabled
-            ? org.fullName
-            : `${org.fullName} — bientôt disponible`}
-        >
-          {org.enabled ? <b>● {org.name}</b> : <>○ {org.name}</>}
-        </span>
-      ))}
+      <a
+        href="/sources"
+        class="orgchip on"
+        title={ORGANIZATIONS.filter((o) => o.enabled)
+          .map((o) => o.name)
+          .join(" · ")}
+      >
+        <b>● {ORGANIZATIONS.filter((o) => o.enabled).length} organismes</b>
+        {` · ${ACTIVE_SOURCES.length} flux`}
+      </a>
     </nav>
   );
 }
@@ -55,7 +54,7 @@ export function SiteFooter() {
       <span>
         <span class="barcode" /> CNRS//FLUX
       </span>
-      <span>Données : flux RSS publics du CNRS</span>
+      <span>Données : flux RSS publics des organismes</span>
       <span>
         <a
           href="https://github.com/simon256px/CNRS-flux"

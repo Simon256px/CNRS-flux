@@ -4,8 +4,8 @@
  */
 import type { Article, CollectResult, FeedMeta, Source } from "../lib/types.ts";
 import {
-  getArticle,
   getFeedMeta,
+  knownArticleIds,
   saveArticle,
   setFeedMeta,
 } from "../lib/kv.ts";
@@ -57,22 +57,23 @@ async function fetchOgImage(url: string): Promise<string | undefined> {
   }
 }
 
-/** Écarte les items non éditoriaux (newsletters, pages de test). */
-function isNoise(item: ParsedItem): boolean {
+/** Écarte les items non éditoriaux (newsletters, pages de test, exclusions). */
+function isNoise(item: ParsedItem, exclude?: RegExp): boolean {
   if (!item.title || !item.link) return true;
   if (item.link.includes("/newsletter/")) return true;
   if (/^test\b/i.test(item.title)) return true;
+  if (exclude?.test(`${item.link} ${item.categories.join(" ")}`)) return true;
   return false;
 }
 
-async function toArticle(item: ParsedItem, source: Source): Promise<Article> {
+function toArticle(item: ParsedItem, source: Source, id: string): Article {
   const themes = new Set(source.themes);
   for (const cat of item.categories) {
     const theme = themeFromCategory(cat);
     if (theme) themes.add(theme);
   }
   return {
-    id: await articleId(item),
+    id,
     sourceId: source.id,
     org: source.org,
     title: stripHtml(item.title, 300),
@@ -81,7 +82,9 @@ async function toArticle(item: ParsedItem, source: Source): Promise<Article> {
     image: item.image,
     categories: item.categories,
     themes: [...themes],
-    publishedAt: item.publishedAt ?? Date.now(),
+    // Borné à maintenant : certains flux (événements, formations) datent
+    // leurs items dans le futur, ce qui les épinglerait en tête du fil.
+    publishedAt: Math.min(item.publishedAt ?? Date.now(), Date.now()),
     fetchedAt: Date.now(),
   };
 }
@@ -132,11 +135,21 @@ export async function collectSource(source: Source): Promise<CollectResult> {
     meta.etag = res.headers.get("etag") ?? undefined;
     meta.lastModified = res.headers.get("last-modified") ?? undefined;
 
-    const items = parseFeed(await res.text()).filter((i) => !isNoise(i));
+    const exclude = source.exclude
+      ? new RegExp(source.exclude, "i")
+      : undefined;
+    const items = parseFeed(await res.text()).filter(
+      (i) => !isNoise(i, exclude),
+    );
+
+    // Ids calculés d'avance et vérifiés par lots : seuls les articles
+    // réellement nouveaux sont normalisés, enrichis et écrits.
+    const ids = await Promise.all(items.map(articleId));
+    const known = await knownArticleIds(ids);
     let added = 0;
-    for (const item of items) {
-      const article = await toArticle(item, source);
-      if (await getArticle(article.id)) continue; // déjà connu
+    for (let i = 0; i < items.length; i++) {
+      if (known.has(ids[i])) continue; // déjà connu
+      const article = toArticle(items[i], source, ids[i]);
       if (!article.image) article.image = await fetchOgImage(article.link);
       if (await saveArticle(article)) added++;
     }

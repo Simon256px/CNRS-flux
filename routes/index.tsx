@@ -63,8 +63,9 @@ function Home({ initial, lastFetchAt, errors }: HomeProps) {
             <span class="hollow">CNRS</span>
           </h1>
           <p class="tagline">
-            <span class="dot">●</span>{" "}
-            L'actualité de la recherche — CNRS · Inserm · Inria · CEA · CERN
+            <span class="dot">●</span> L'actualité de la recherche —{" "}
+            {ORGANIZATIONS.filter((o) => o.enabled).length}{" "}
+            organismes, collectés en continu
           </p>
         </div>
 

@@ -36,6 +36,11 @@ export interface Source {
   region?: string;
   /** Thèmes scientifiques canoniques portés par la source. */
   themes: string[];
+  /**
+   * Regex (insensible à la casse) testée contre lien + catégories de
+   * chaque item ; les correspondances sont écartées (contenu sponsorisé…).
+   */
+  exclude?: string;
   enabled: boolean;
 }
 

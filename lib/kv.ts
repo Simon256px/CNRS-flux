@@ -54,6 +54,26 @@ export async function listArticles(max = 2000): Promise<Article[]> {
   return articles;
 }
 
+/**
+ * Sous-ensemble des ids déjà stockés, vérifiés par lots de 10 via getMany
+ * (une requête KV par lot au lieu d'une par article — important sur
+ * Deno Deploy où chaque get est un aller-retour réseau).
+ */
+export async function knownArticleIds(ids: string[]): Promise<Set<string>> {
+  const kv = await getKv();
+  const known = new Set<string>();
+  for (let i = 0; i < ids.length; i += 10) {
+    const batch = ids.slice(i, i + 10);
+    const entries = await kv.getMany(
+      batch.map((id) => ["article_ref", id] as const),
+    );
+    entries.forEach((entry, j) => {
+      if (entry.value !== null) known.add(batch[j]);
+    });
+  }
+  return known;
+}
+
 export async function getArticle(id: string): Promise<Article | null> {
   const kv = await getKv();
   const ref = await kv.get<number>(["article_ref", id]);

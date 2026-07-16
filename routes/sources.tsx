@@ -30,7 +30,7 @@ const GROUPS: SourceKind[] = ["national", "journal", "institut", "delegation"];
 
 const GROUP_LABEL: Record<SourceKind, string> = {
   national: "Flux nationaux",
-  journal: "CNRS Le Journal",
+  journal: "Médias scientifiques",
   institut: "Instituts thématiques",
   delegation: "Délégations régionales",
   laboratoire: "Laboratoires",
