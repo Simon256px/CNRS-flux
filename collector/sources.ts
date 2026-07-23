@@ -42,6 +42,9 @@ const ORG_DEFS: [string, string, string, boolean][] = [
   ["sorbonne", "Sorbonne", "Sorbonne Université", true],
   ["futura", "Futura", "Futura Sciences (média)", true],
   ["conversation", "The Conversation", "The Conversation France (média)", true],
+  ["esa", "ESA", "Agence spatiale européenne", true],
+  ["ipgp", "IPGP", "Institut de physique du globe de Paris", true],
+  ["pourlascience", "Pour la Science", "Pour la Science (média)", true],
   // Sans flux RSS d'actualités public exploitable (vérifié juillet 2026) —
   // flux morts, vides ou inexistants. Passer enabled à true et déclarer la
   // source si l'un d'eux (re)publie un flux.
@@ -506,6 +509,24 @@ export const SOURCES: Source[] = [
     homepage: "https://www.sorbonne-universite.fr",
     feedUrl: "https://www.sorbonne-universite.fr/rss.xml",
   }),
+  src({
+    id: "esa",
+    org: "esa",
+    name: "ESA — Actualités France",
+    shortName: "ESA",
+    homepage: "https://www.esa.int/Space_in_Member_States/France",
+    feedUrl: "https://www.esa.int/rssfeed/ESA_in_your_country/France",
+    themes: ["Terre & Univers"],
+  }),
+  src({
+    id: "ipgp",
+    org: "ipgp",
+    name: "IPGP — Actualités",
+    shortName: "IPGP",
+    homepage: "https://www.ipgp.fr",
+    feedUrl: "https://www.ipgp.fr/feed/",
+    themes: ["Terre & Univers"],
+  }),
 
   // ── Médias scientifiques ────────────────────────────────────────────────
   src({
@@ -527,6 +548,15 @@ export const SOURCES: Source[] = [
     shortName: "THE CONVERSATION",
     homepage: "https://theconversation.com/fr",
     feedUrl: "https://theconversation.com/fr/articles.atom",
+  }),
+  src({
+    id: "pourlascience",
+    org: "pourlascience",
+    kind: "journal",
+    name: "Pour la Science",
+    shortName: "POUR LA SCIENCE",
+    homepage: "https://www.pourlascience.fr",
+    feedUrl: "https://www.pourlascience.fr/rss.xml",
   }),
 ];
 
