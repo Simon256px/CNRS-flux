@@ -1,6 +1,6 @@
 # CNRS//FLUX
 
-**🌐 Site en ligne : <https://cnrs-flux.simon256px.deno.net>**
+**🌐 Site en ligne : <https://flux.simoncourtois.com/>**
 
 Agrégateur d'actualité scientifique — 16 organismes : CNRS (instituts,
 délégations régionales, Le Journal), Inserm, Inria, CEA, CERN, ESA, IRD, IPGP,
