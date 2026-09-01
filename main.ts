@@ -13,4 +13,12 @@ app.fsRoutes();
 // du build statique, d'où la garde).
 if (typeof Deno.cron === "function") {
   registerCron();
+
+  // `deno serve` n'installe pas de gestionnaire de signal, et Deno.cron()
+  // maintient la boucle d'événements vivante : le processus ne quittait donc
+  // ni sur SIGTERM ni sur SIGINT, et systemd l'abattait après le
+  // TimeoutStopSec (core dump à chaque redéploiement).
+  for (const signal of ["SIGINT", "SIGTERM"] as const) {
+    Deno.addSignalListener(signal, () => Deno.exit(0));
+  }
 }
