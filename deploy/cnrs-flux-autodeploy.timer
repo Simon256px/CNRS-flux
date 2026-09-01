@@ -1,0 +1,11 @@
+[Unit]
+Description=Vérifie toutes les 2 min si un commit est arrivé sur main
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+# Laisse systemd regrouper les réveils : inutile d'être à la seconde près.
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

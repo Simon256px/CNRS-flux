@@ -1,0 +1,31 @@
+#!/bin/bash
+# Déploie CNRS//FLUX quand un nouveau commit arrive sur origin/main.
+#
+# Appelé par cnrs-flux-autodeploy.timer. Le cas courant — rien de nouveau —
+# ne coûte qu'un `git ls-remote`, mesuré à ~0,03 s de CPU sur ce serveur.
+#
+# Le build tourne AVANT le redémarrage et le script s'arrête à la première
+# erreur (set -e) : si le build échoue, le service continue de servir
+# l'ancienne version au lieu d'être redémarré sur du code cassé.
+set -euo pipefail
+
+APP=/srv/cnrs-flux/app
+BRANCH=main
+DENO=/usr/local/bin/deno
+
+# git et deno tournent sous le compte propriétaire de l'app, jamais en root ;
+# seul le redémarrage du service a besoin des privilèges.
+as_app() { runuser -u cnrsflux -- "$@"; }
+
+local_rev=$(as_app git -C "$APP" rev-parse HEAD)
+remote_rev=$(as_app git -C "$APP" ls-remote origin "$BRANCH" | cut -f1)
+
+if [ "$local_rev" = "$remote_rev" ]; then
+  exit 0
+fi
+
+echo "nouveau commit sur $BRANCH : ${local_rev:0:7} -> ${remote_rev:0:7}"
+as_app git -C "$APP" pull --ff-only
+as_app env DENO_DIR=/srv/cnrs-flux/.deno_cache bash -c "cd '$APP' && '$DENO' task build"
+systemctl restart cnrs-flux
+echo "déployé : $(as_app git -C "$APP" log --oneline -1)"
