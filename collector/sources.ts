@@ -45,6 +45,12 @@ const ORG_DEFS: [string, string, string, boolean][] = [
   ["esa", "ESA", "Agence spatiale européenne", true],
   ["ipgp", "IPGP", "Institut de physique du globe de Paris", true],
   ["pourlascience", "Pour la Science", "Pour la Science (média)", true],
+  [
+    "simoncourtois",
+    "Simon Courtois",
+    "Journal personnel écrit par le mainteneur du site",
+    true,
+  ],
   // Sans flux RSS d'actualités public exploitable (vérifié juillet 2026) —
   // flux morts, vides ou inexistants. Passer enabled à true et déclarer la
   // source si l'un d'eux (re)publie un flux.
@@ -519,6 +525,17 @@ export const SOURCES: Source[] = [
     themes: ["Terre & Univers"],
   }),
   src({
+    // Seul flux non francophone du registre : l'ESA ne publie pas de version
+    // française des actualités du télescope Webb.
+    id: "esawebb",
+    org: "esa",
+    name: "ESA/Webb — Actualités du télescope (en anglais)",
+    shortName: "ESA/WEBB",
+    homepage: "https://esawebb.org",
+    feedUrl: "https://esawebb.org/news/feed/",
+    themes: ["Terre & Univers"],
+  }),
+  src({
     id: "ipgp",
     org: "ipgp",
     name: "IPGP — Actualités",
@@ -557,6 +574,15 @@ export const SOURCES: Source[] = [
     shortName: "POUR LA SCIENCE",
     homepage: "https://www.pourlascience.fr",
     feedUrl: "https://www.pourlascience.fr/rss.xml",
+  }),
+  src({
+    id: "simoncourtois",
+    org: "simoncourtois",
+    kind: "journal",
+    name: "Simon Courtois — Journal",
+    shortName: "SIMON COURTOIS",
+    homepage: "https://simoncourtois.com",
+    feedUrl: "https://simoncourtois.com/feed.xml",
   }),
 ];
 
