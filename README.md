@@ -78,9 +78,9 @@ static/         CSS, fontes auto-hébergées, favicon
 | `GET /api/articles` | `q`, `org`, `kind`, `source`, `region`, `theme`, `limit`, `offset` |
 | `GET /api/sources`  | Organismes, sources actives, état de collecte, facettes            |
 | `GET /api/stats`    | Compteurs globaux, dernière synchro, planification                 |
-| `POST /api/collect` | Déclenche une collecte manuelle                                    |
+| `POST /api/collect` | Collecte manuelle (jeton `COLLECT_TOKEN` requis)                   |
 
-## Sources suivies (44)
+## Sources suivies (46)
 
 **CNRS (28 flux)**
 
@@ -93,19 +93,21 @@ static/         CSS, fontes auto-hébergées, favicon
   Meudon, Villejuif), Normandie, Occitanie Est/Ouest, Paris-Centre, Provence et
   Corse, Rhône Auvergne
 
-**Organismes de recherche (13 flux)**
+**Organismes de recherche (14 flux)**
 
 - **Inserm** : actualités + salle de presse
-- **Inria**, **CERN** (édition française), **ESA** (actualités France), **IRD**,
-  **IPGP**, **Gustave Roussy**, **Météo-France**, **Observatoire de Paris**,
-  **Université Paris-Saclay**, **Sorbonne Université** : actualités
+- **Inria**, **CERN** (édition française), **ESA** (actualités France et Webb,
+  en anglais), **IRD**, **IPGP**, **Gustave Roussy**, **Météo-France**,
+  **Observatoire de Paris**, **Université Paris-Saclay**, **Sorbonne
+  Université** : actualités
 - **CEA** : presse & médias
 
-**Médias scientifiques (3 flux)**
+**Médias scientifiques (4 flux)**
 
 - **Futura Sciences** (contenu sponsorisé filtré via `exclude`)
 - **The Conversation France** (Atom)
 - **Pour la Science**
+- **Simon Courtois** (blog personnel du mainteneur)
 
 **Sans flux RSS public exploitable** (vérifié juillet 2026, déclarés « à venir
 ») : CNES, Institut Pasteur, INRAE, IFREMER, BRGM, ANSES, Institut Curie.

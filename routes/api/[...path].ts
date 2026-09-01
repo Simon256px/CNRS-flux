@@ -6,7 +6,8 @@
  *                         region, theme, limit, offset)
  *   GET  /api/sources   — organismes, sources actives, état de collecte, facettes
  *   GET  /api/stats     — compteurs globaux et état du collecteur
- *   POST /api/collect   — déclenche une collecte manuelle
+ *   POST /api/collect   — déclenche une collecte manuelle (jeton requis :
+ *                         en-tête Authorization: Bearer $COLLECT_TOKEN)
  */
 import { Hono } from "@hono/hono";
 import { define } from "../../utils.ts";
@@ -70,6 +71,21 @@ api.get("/stats", async (c) => {
 });
 
 api.post("/collect", async (c) => {
+  // Endpoint coûteux (une requête sortante par source) : réservé au porteur
+  // du jeton. Sans COLLECT_TOKEN configuré il reste fermé — jamais ouvert
+  // par défaut, sinon n'importe qui fait sortir des dizaines de requêtes
+  // depuis le serveur et accélère son blocage par les éditeurs de flux.
+  const token = Deno.env.get("COLLECT_TOKEN");
+  if (!token) {
+    return c.json(
+      { error: "COLLECT_TOKEN non configuré : endpoint désactivé" },
+      503,
+    );
+  }
+  if (c.req.header("authorization") !== `Bearer ${token}`) {
+    return c.json({ error: "Jeton invalide ou absent" }, 401);
+  }
+
   const results = await collectAll();
   return c.json({
     added: results.reduce((sum, r) => sum + r.added, 0),

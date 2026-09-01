@@ -132,15 +132,30 @@ export async function collectSource(source: Source): Promise<CollectResult> {
       throw new Error(`HTTP ${res.status}`);
     }
 
-    meta.etag = res.headers.get("etag") ?? undefined;
-    meta.lastModified = res.headers.get("last-modified") ?? undefined;
+    const body = await res.text();
+    // Un 200 peut masquer une page HTML (blocage WAF, page d'erreur) :
+    // le dire explicitement plutôt que de laisser remonter une erreur de
+    // parsing XML incompréhensible. On renifle le corps et non le
+    // content-type : des serveurs mal configurés servent du RSS valide en
+    // text/html.
+    if (/^\s*(<!doctype html|<html[\s>])/i.test(body)) {
+      const type = res.headers.get("content-type") ?? "absent";
+      throw new Error(`page HTML au lieu du flux (content-type : ${type})`);
+    }
 
     const exclude = source.exclude
       ? new RegExp(source.exclude, "i")
       : undefined;
-    const items = parseFeed(await res.text()).filter(
+    const items = parseFeed(body).filter(
       (i) => !isNoise(i, exclude),
     );
+
+    // Validateurs de cache mémorisés seulement après un parsing réussi.
+    // Sinon une page d'erreur écrase l'etag valide, et pire : un 304 sur
+    // cette page ferait passer la panne pour un « non modifié », donc une
+    // source qui cesse silencieusement de se mettre à jour.
+    meta.etag = res.headers.get("etag") ?? undefined;
+    meta.lastModified = res.headers.get("last-modified") ?? undefined;
 
     // Ids calculés d'avance et vérifiés par lots : seuls les articles
     // réellement nouveaux sont normalisés, enrichis et écrits.
