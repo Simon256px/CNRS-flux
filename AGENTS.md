@@ -1,4 +1,4 @@
-# CLAUDE.md — CNRS//FLUX
+# AGENTS.md — CNRS//FLUX
 
 Agrégateur d'actualité scientifique (CNRS, Inserm, Inria, CEA, CERN), 100 %
 écosystème Deno : Deno 2, Fresh 2 (builder, pas Vite), Hono, Deno KV,
