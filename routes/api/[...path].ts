@@ -12,6 +12,7 @@
 import { Hono } from "@hono/hono";
 import { define } from "../../utils.ts";
 import {
+  activeFeedMeta,
   countAll,
   countBySource,
   facets,
@@ -58,7 +59,7 @@ api.get("/sources", async (c) => {
 });
 
 api.get("/stats", async (c) => {
-  const [metas, articles] = await Promise.all([listFeedMeta(), countAll()]);
+  const [metas, articles] = await Promise.all([activeFeedMeta(), countAll()]);
   const lastFetchAt = Math.max(0, ...metas.map((m) => m.lastFetchAt));
   return c.json({
     articles,

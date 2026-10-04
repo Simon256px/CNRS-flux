@@ -4,8 +4,7 @@
  * depuis Deno KV — l'API n'est interrogée qu'ensuite, à l'interaction.
  */
 import { define } from "../utils.ts";
-import { facets, queryArticles } from "../lib/feed.ts";
-import { listFeedMeta } from "../lib/kv.ts";
+import { activeFeedMeta, facets, queryArticles } from "../lib/feed.ts";
 import { ACTIVE_SOURCES, ORGANIZATIONS } from "../collector/sources.ts";
 import {
   formatDate,
@@ -21,7 +20,7 @@ export const handler = define.handlers({
   async GET(ctx) {
     const [initial, metas] = await Promise.all([
       queryArticles({ limit: 24 }),
-      listFeedMeta(),
+      activeFeedMeta(),
     ]);
     const lastFetchAt = Math.max(0, ...metas.map((m) => m.lastFetchAt));
     const errors = metas.filter((m) => m.lastStatus === "error").length;

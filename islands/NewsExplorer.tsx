@@ -113,7 +113,9 @@ export default function NewsExplorer(
         </div>
         <div class="filterrow">
           <div class="tabs" role="tablist">
-            {KIND_TABS.map((tab) => (
+            {KIND_TABS.filter((tab) =>
+              tab.value === "" || sources.some((s) => s.kind === tab.value)
+            ).map((tab) => (
               <button
                 key={tab.value}
                 type="button"
@@ -145,14 +147,16 @@ export default function NewsExplorer(
             ))}
           </select>
 
-          <select
-            value={region}
-            onChange={(e) => setRegion((e.target as HTMLSelectElement).value)}
-            aria-label="Filtrer par région"
-          >
-            <option value="">Région : toutes</option>
-            {regions.map((r) => <option key={r} value={r}>{r}</option>)}
-          </select>
+          {regions.length > 0 && (
+            <select
+              value={region}
+              onChange={(e) => setRegion((e.target as HTMLSelectElement).value)}
+              aria-label="Filtrer par région"
+            >
+              <option value="">Région : toutes</option>
+              {regions.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          )}
 
           <select
             value={theme}

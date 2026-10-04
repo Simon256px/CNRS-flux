@@ -2,11 +2,11 @@
 
 **🌐 Site en ligne : <https://flux.simoncourtois.com/>**
 
-Agrégateur d'actualité scientifique — 16 organismes : CNRS (instituts,
-délégations régionales, Le Journal), Inserm, Inria, CEA, CERN, ESA, IRD, IPGP,
-Gustave Roussy, Météo-France, Observatoire de Paris, Université Paris-Saclay,
-Sorbonne Université, Futura Sciences, The Conversation France et Pour la Science
-— collectée automatiquement, indexée dans Deno KV, recherchable et filtrable.
+Agrégateur d'actualité scientifique — 20 organismes : CNRS Le Journal, Inserm,
+CEA, CERN, ESA, IRD, IPGP, Gustave Roussy, Météo-France, Observatoire de Paris,
+Université Paris-Saclay, des médias scientifiques et des médias indépendants
+(Reporterre, Vert, Bon Pote, Splann!, AFIS, Sciences Humaines…) — collectée
+automatiquement, indexée dans Deno KV, recherchable et filtrable.
 
 **100 % écosystème Deno** : Deno 2, [Fresh 2](https://fresh.deno.dev) (SSR +
 islands), [Hono](https://hono.dev) (API), Deno KV (stockage), `Deno.cron()`
@@ -80,37 +80,40 @@ static/         CSS, fontes auto-hébergées, favicon
 | `GET /api/stats`    | Compteurs globaux, dernière synchro, planification                 |
 | `POST /api/collect` | Collecte manuelle (jeton `COLLECT_TOKEN` requis)                   |
 
-## Sources suivies (46)
+## Sources suivies (22)
 
-**CNRS (28 flux)**
+**CNRS (1 flux)**
 
-- **National** : actualités cnrs.fr
 - **CNRS Le Journal** (rubriques mappées vers les thèmes)
-- **10 instituts** : INSB, INC, INEE, INSHS, INS2I, INSIS, INSMI, INP, IN2P3,
-  INSU
-- **16 délégations régionales** : Alsace, Alpes, Aquitaine, Centre-Est, Centre
-  Limousin Poitou-Charentes, Côte d'Azur, Hauts-de-France, Île-de-France (Gif,
-  Meudon, Villejuif), Normandie, Occitanie Est/Ouest, Paris-Centre, Provence et
-  Corse, Rhône Auvergne
 
-**Organismes de recherche (14 flux)**
+**Organismes de recherche (12 flux)**
 
 - **Inserm** : actualités + salle de presse
-- **Inria**, **CERN** (édition française), **ESA** (actualités France et Webb,
-  en anglais), **IRD**, **IPGP**, **Gustave Roussy**, **Météo-France**,
-  **Observatoire de Paris**, **Université Paris-Saclay**, **Sorbonne
-  Université** : actualités
+- **CERN** (édition française), **ESA** (actualités France et Webb, en anglais),
+  **IRD**, **IPGP**, **Gustave Roussy**, **Météo-France**, **Observatoire de
+  Paris**, **Université Paris-Saclay** : actualités
 - **CEA** : presse & médias
 
-**Médias scientifiques (4 flux)**
+**Médias (9 flux)**
 
 - **Futura Sciences** (contenu sponsorisé filtré via `exclude`)
 - **The Conversation France** (Atom)
-- **Pour la Science**
+- **Médias indépendants** — structure vérifiée sur leurs mentions légales
+  (octobre 2026) : **Reporterre** (association, sans actionnaire), **Vert**
+  (détenu par ses fondateurs), **Bon Pote** (financé par ses lecteurs),
+  **Splann!** (association), **AFIS** (association), **Sciences Humaines**
+  (fondateur actionnaire majoritaire)
 - **Simon Courtois** (blog personnel du mainteneur)
 
-**Sans flux RSS public exploitable** (vérifié juillet 2026, déclarés « à venir
-») : CNES, Institut Pasteur, INRAE, IFREMER, BRGM, ANSES, Institut Curie.
+**Sans flux RSS public exploitable** (déclarés « à venir ») :
+
+- CNES, Institut Pasteur, INRAE, IFREMER, BRGM, ANSES, Institut Curie (vérifié
+  juillet 2026).
+- **Instituts et délégations du CNRS, flux national** (vérifié octobre 2026) :
+  les sites publient sur `/fr/news-list`, une vue sans flux ; l'ancien
+  `/fr/rss.xml` est figé entre 2019 et 2023. Sources déclarées mais désactivées.
+- **Inria** (figé depuis septembre 2024), **Sorbonne Université** (depuis
+  octobre 2023).
 
 ## Étendre l'agrégateur
 

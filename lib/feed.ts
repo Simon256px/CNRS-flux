@@ -4,8 +4,14 @@
  * et pagine le résultat. Un petit cache mémoire évite de relire KV à chaque
  * requête.
  */
-import type { Article, ArticlePage, ArticleQuery, Source } from "./types.ts";
-import { listArticles } from "./kv.ts";
+import type {
+  Article,
+  ArticlePage,
+  ArticleQuery,
+  FeedMeta,
+  Source,
+} from "./types.ts";
+import { listArticles, listFeedMeta } from "./kv.ts";
 import { ACTIVE_SOURCES, getSource } from "../collector/sources.ts";
 import { searchArticles } from "./search.ts";
 
@@ -17,9 +23,20 @@ export function invalidateFeedCache(): void {
   cache = undefined;
 }
 
+// Le registre fait foi : les articles d'une source retirée ou désactivée
+// restent en KV mais ne sont plus servis.
+const ACTIVE_IDS = new Set(ACTIVE_SOURCES.map((s) => s.id));
+
+/** État de collecte des seules sources actives (même règle). */
+export async function activeFeedMeta(): Promise<FeedMeta[]> {
+  return (await listFeedMeta()).filter((m) => ACTIVE_IDS.has(m.sourceId));
+}
+
 async function allArticles(): Promise<Article[]> {
   if (cache && Date.now() - cache.at < CACHE_TTL_MS) return cache.articles;
-  const articles = await listArticles();
+  const articles = (await listArticles()).filter((a) =>
+    ACTIVE_IDS.has(a.sourceId)
+  );
   cache = { at: Date.now(), articles };
   return articles;
 }

@@ -17,12 +17,6 @@ const ORG_DEFS: [string, string, string, boolean][] = [
     true,
   ],
   [
-    "inria",
-    "Inria",
-    "Institut national de recherche en sciences et technologies du numérique",
-    true,
-  ],
-  [
     "cea",
     "CEA",
     "Commissariat à l'énergie atomique et aux énergies alternatives",
@@ -39,18 +33,39 @@ const ORG_DEFS: [string, string, string, boolean][] = [
   ["meteofrance", "Météo-France", "Établissement public de météorologie", true],
   ["obspm", "Obs. de Paris", "Observatoire de Paris - PSL", true],
   ["paris-saclay", "Paris-Saclay", "Université Paris-Saclay", true],
-  ["sorbonne", "Sorbonne", "Sorbonne Université", true],
   ["futura", "Futura", "Futura Sciences (média)", true],
   ["conversation", "The Conversation", "The Conversation France (média)", true],
   ["esa", "ESA", "Agence spatiale européenne", true],
   ["ipgp", "IPGP", "Institut de physique du globe de Paris", true],
-  ["pourlascience", "Pour la Science", "Pour la Science (média)", true],
   [
     "simoncourtois",
     "Simon Courtois",
     "Journal personnel écrit par le mainteneur du site",
     true,
   ],
+  // Médias indépendants : structure et actionnariat vérifiés sur leurs
+  // mentions légales (octobre 2026).
+  ["reporterre", "Reporterre", "Reporterre, le média de l'écologie", true],
+  ["vert", "Vert", "Vert (média climat)", true],
+  ["bonpote", "Bon Pote", "Bon Pote (média climat)", true],
+  ["splann", "Splann!", "Splann! (enquêtes environnementales)", true],
+  [
+    "afis",
+    "AFIS",
+    "Association française pour l'information scientifique",
+    true,
+  ],
+  ["scienceshumaines", "Sciences Humaines", "Sciences Humaines (média)", true],
+  // Flux figés (vérifié octobre 2026) : Inria n'en publie plus depuis
+  // septembre 2024, Sorbonne depuis octobre 2023, et aucun remplaçant n'est
+  // déclaré sur leurs sites.
+  [
+    "inria",
+    "Inria",
+    "Institut national de recherche en sciences et technologies du numérique",
+    false,
+  ],
+  ["sorbonne", "Sorbonne", "Sorbonne Université", false],
   // Sans flux RSS d'actualités public exploitable (vérifié juillet 2026) —
   // flux morts, vides ou inexistants. Passer enabled à true et déclarer la
   // source si l'un d'eux (re)publie un flux.
@@ -157,7 +172,13 @@ function cnrs(spec: SourceSpec): Source {
     feedUrl: `https://${spec.host}${spec.feedPath ?? "/fr/rss.xml"}`,
     region: spec.region,
     themes: spec.themes ?? [],
-    enabled: true,
+    // Désactivées (vérifié octobre 2026) : les sites *.cnrs.fr publient leurs
+    // actualités sur /fr/news-list, une vue Drupal sans flux (?_format=rss
+    // répond 406). L'ancien /fr/rss.xml répond toujours 200 avec un
+    // Last-Modified du jour, mais son contenu est figé entre 2019 et 2023 —
+    // et le flux national ne contient plus qu'un article de test et des
+    // newsletters. À réactiver si le CNRS republie des flux.
+    enabled: false,
   };
 }
 
@@ -436,15 +457,6 @@ export const SOURCES: Source[] = [
     themes: ["Biologie"],
   }),
   src({
-    id: "inria",
-    org: "inria",
-    name: "Inria — Actualités",
-    shortName: "INRIA",
-    homepage: "https://www.inria.fr/fr",
-    feedUrl: "https://www.inria.fr/fr/rss.xml",
-    themes: ["Numérique"],
-  }),
-  src({
     id: "cea",
     org: "cea",
     name: "CEA — Presse & médias",
@@ -486,8 +498,10 @@ export const SOURCES: Source[] = [
     org: "meteofrance",
     name: "Météo-France — Actualités",
     shortName: "MÉTÉO-FRANCE",
-    homepage: "https://meteofrance.fr",
-    feedUrl: "https://meteofrance.fr/rss.xml",
+    // Le site grand public (.com), et non l'institutionnel (.fr) dont le
+    // flux est figé depuis septembre 2025.
+    homepage: "https://meteofrance.com",
+    feedUrl: "https://meteofrance.com/rss.xml",
     themes: ["Écologie & environnement"],
   }),
   src({
@@ -506,14 +520,6 @@ export const SOURCES: Source[] = [
     shortName: "PARIS-SACLAY",
     homepage: "https://www.universite-paris-saclay.fr",
     feedUrl: "https://www.universite-paris-saclay.fr/rss.xml",
-  }),
-  src({
-    id: "sorbonne",
-    org: "sorbonne",
-    name: "Sorbonne Université — Actualités",
-    shortName: "SORBONNE",
-    homepage: "https://www.sorbonne-universite.fr",
-    feedUrl: "https://www.sorbonne-universite.fr/rss.xml",
   }),
   src({
     id: "esa",
@@ -567,15 +573,6 @@ export const SOURCES: Source[] = [
     feedUrl: "https://theconversation.com/fr/articles.atom",
   }),
   src({
-    id: "pourlascience",
-    org: "pourlascience",
-    kind: "journal",
-    name: "Pour la Science",
-    shortName: "POUR LA SCIENCE",
-    homepage: "https://www.pourlascience.fr",
-    feedUrl: "https://www.pourlascience.fr/rss.xml",
-  }),
-  src({
     id: "simoncourtois",
     org: "simoncourtois",
     kind: "journal",
@@ -583,6 +580,65 @@ export const SOURCES: Source[] = [
     shortName: "SIMON COURTOIS",
     homepage: "https://simoncourtois.com",
     feedUrl: "https://simoncourtois.com/feed.xml",
+  }),
+  src({
+    id: "reporterre",
+    org: "reporterre",
+    kind: "journal",
+    name: "Reporterre",
+    shortName: "REPORTERRE",
+    homepage: "https://reporterre.net",
+    feedUrl: "https://reporterre.net/spip.php?page=backend-simple",
+    themes: ["Écologie & environnement"],
+  }),
+  src({
+    id: "vert",
+    org: "vert",
+    kind: "journal",
+    name: "Vert",
+    shortName: "VERT",
+    homepage: "https://vert.eco",
+    feedUrl: "https://vert.eco/feed/",
+    themes: ["Écologie & environnement"],
+  }),
+  src({
+    id: "bonpote",
+    org: "bonpote",
+    kind: "journal",
+    name: "Bon Pote",
+    shortName: "BON POTE",
+    homepage: "https://bonpote.com",
+    feedUrl: "https://bonpote.com/feed/",
+    themes: ["Écologie & environnement"],
+  }),
+  src({
+    id: "splann",
+    org: "splann",
+    kind: "journal",
+    name: "Splann! — Enquêtes",
+    shortName: "SPLANN!",
+    homepage: "https://splann.org",
+    feedUrl: "https://splann.org/feed/",
+    themes: ["Écologie & environnement"],
+  }),
+  src({
+    id: "afis",
+    org: "afis",
+    kind: "journal",
+    name: "AFIS — Science et pseudo-sciences",
+    shortName: "AFIS",
+    homepage: "https://www.afis.org",
+    feedUrl: "https://www.afis.org/spip.php?page=backend",
+  }),
+  src({
+    id: "scienceshumaines",
+    org: "scienceshumaines",
+    kind: "journal",
+    name: "Sciences Humaines",
+    shortName: "SCIENCES HUMAINES",
+    homepage: "https://www.scienceshumaines.com",
+    feedUrl: "https://www.scienceshumaines.com/rss",
+    themes: ["Sciences humaines & sociales"],
   }),
 ];
 
