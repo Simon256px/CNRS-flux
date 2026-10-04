@@ -43,13 +43,11 @@ export async function saveArticle(article: Article): Promise<boolean> {
   return res.ok;
 }
 
-/** Liste les articles du plus récent au plus ancien (au plus `max`). */
-export async function listArticles(max = 2000): Promise<Article[]> {
+/** Liste tous les articles, du plus récent au plus ancien. */
+export async function listArticles(): Promise<Article[]> {
   const kv = await getKv();
   const articles: Article[] = [];
-  const iter = kv.list<Article>({ prefix: ["articles_by_date"] }, {
-    limit: max,
-  });
+  const iter = kv.list<Article>({ prefix: ["articles_by_date"] });
   for await (const entry of iter) articles.push(entry.value);
   return articles;
 }
