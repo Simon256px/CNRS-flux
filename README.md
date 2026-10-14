@@ -1,139 +1,162 @@
 # CNRS//FLUX
 
-**🌐 Site en ligne : <https://flux.simoncourtois.com/>**
+> L'actualité scientifique française au même endroit, collectée toute seule.
 
-Agrégateur d'actualité scientifique — 20 organismes : CNRS Le Journal, Inserm,
-CEA, CERN, ESA, IRD, IPGP, Gustave Roussy, Météo-France, Observatoire de Paris,
-Université Paris-Saclay, des médias scientifiques et des médias indépendants
-(Reporterre, Vert, Bon Pote, Splann!, AFIS, Sciences Humaines…) — collectée
-automatiquement, indexée dans Deno KV, recherchable et filtrable.
+CNRS//FLUX agrège les actualités d'une vingtaine d'organismes de recherche et de
+médias scientifiques — CNRS Le Journal, Inserm, CEA, CERN, ESA, IRD, IPGP,
+Gustave Roussy, Météo-France, Observatoire de Paris, Université Paris-Saclay,
+The Conversation, Reporterre, Vert, Bon Pote, Splann!, AFIS, Sciences Humaines…
+Les articles sont collectés automatiquement, indexés dans Deno KV, et se
+cherchent et se filtrent par organisme, région ou thème.
 
-**100 % écosystème Deno** : Deno 2, [Fresh 2](https://fresh.deno.dev) (SSR +
-islands), [Hono](https://hono.dev) (API), Deno KV (stockage), `Deno.cron()`
-(collecte planifiée), packages JSR.
+En ligne sur **[flux.simoncourtois.com](https://flux.simoncourtois.com/)**.
 
-<img width="1346" height="948" alt="flux" src="https://github.com/user-attachments/assets/627012ee-4ae2-4729-838a-86f9a6a992d5" />
+Construit entièrement sur l'écosystème Deno : Deno 2,
+[Fresh 2](https://fresh.deno.dev) (rendu serveur et îlots),
+[Hono](https://hono.dev) (API), Deno KV (stockage), `Deno.cron()` (collecte
+planifiée), paquets JSR.
+
+## Sommaire
+
+- [Démarrage](#démarrage)
+- [Fonctionnement](#fonctionnement)
+- [API](#api)
+- [Sources](#sources)
+- [Ajouter une source](#ajouter-une-source)
+- [Structure](#structure)
+- [Déploiement](#déploiement)
+- [Contribuer](#contribuer)
+- [Soutenir le projet](#soutenir-le-projet)
+- [Licence](#licence)
 
 ## Démarrage
 
+Prérequis : [Deno](https://deno.com) 2.x.
+
 ```sh
-# Serveur de développement (collecte initiale automatique au démarrage)
-deno task dev            # → http://localhost:8000
-
-# Collecte manuelle unique
-deno task collect
-
-# Production
-deno task build
-deno task start
-
-# Qualité
-deno task check          # fmt + lint + typecheck
+git clone https://github.com/Simon256px/CNRS-flux.git
+cd CNRS-flux
+deno task dev            # http://localhost:8000, collecte initiale au démarrage
 ```
 
-Aucune configuration requise : la base Deno KV est créée au premier lancement
-(chemin surchargeable via la variable d'environnement `KV_PATH`).
+| Commande            | Rôle                                          |
+| ------------------- | --------------------------------------------- |
+| `deno task dev`     | serveur de développement avec rechargement    |
+| `deno task collect` | lance une collecte unique, puis s'arrête      |
+| `deno task build`   | build de production dans `_fresh/`            |
+| `deno task start`   | sert le build de production                   |
+| `deno task check`   | `deno fmt --check`, `deno lint`, `deno check` |
 
-## Architecture
+Aucune configuration n'est nécessaire : la base Deno KV est créée au premier
+lancement.
 
-```
-collector/
-  sources.ts    Registre des sources : organismes, flux, régions, thèmes
-  parser.ts     Parsing RSS 2.0 / Atom (@libs/xml) → format neutre
-  rss.ts        Téléchargement (GET conditionnel ETag/Last-Modified),
-                normalisation, enrichissement og:image, dédup atomique
-  cron.ts       Deno.cron (toutes les 30 min) + collecte initiale
-lib/
-  types.ts      Types partagés (Organization, Source, Article, …)
-  kv.ts         Couche Deno KV (index antéchronologique, dédup, meta)
-  feed.ts       Lecture filtrée/paginée du fil + facettes + cache
-  search.ts     Recherche plein texte (accents ignorés, score de pertinence)
-  display.ts    Helpers d'affichage partagés SSR/îles
-routes/
-  index.tsx     Accueil : hero télémétrie + explorateur d'actualités
-  sources.tsx   Tableau de bord du réseau de flux
-  api/[...path].ts  API Hono montée sous /api
-islands/
-  NewsExplorer.tsx  Console de recherche + grille (fetch /api/articles)
-components/     Chrome du site, carte article
-static/         CSS, fontes auto-hébergées, favicon
-```
+| Variable        | Rôle                                                               |
+| --------------- | ------------------------------------------------------------------ |
+| `KV_PATH`       | emplacement de la base Deno KV (par défaut, celui choisi par Deno) |
+| `COLLECT_TOKEN` | active `POST /api/collect` ; sans lui, l'endpoint reste fermé      |
 
-### Flux de données
+## Fonctionnement
 
-1. `Deno.cron` (ou le démarrage si les données ont plus de 30 min) déclenche
-   `collectAll()` : les 28 flux sont téléchargés avec une concurrence bornée et
-   un GET conditionnel (`ETag`/`Last-Modified`).
-2. Chaque item est parsé, nettoyé (HTML → texte), rattaché à ses thèmes
-   canoniques, enrichi d'une image Open Graph si le flux n'en fournit pas.
-3. L'insertion est **atomique et dédupliquée** : la clé primaire est un hash
-   SHA-256 du `guid`/lien ; un article déjà connu est ignoré.
+1. `Deno.cron` déclenche la collecte toutes les 30 minutes, ainsi qu'au
+   démarrage si les données ont plus de 30 minutes. Les flux sont téléchargés
+   avec une concurrence bornée et un GET conditionnel (`ETag` /
+   `Last-Modified`).
+2. Chaque article est parsé (RSS 2.0 ou Atom), nettoyé du HTML, rattaché à ses
+   thèmes, et enrichi d'une image Open Graph si le flux n'en fournit pas.
+3. L'insertion est atomique et dédupliquée : la clé est un hash SHA-256 du
+   `guid` ou du lien, et un article déjà connu est ignoré.
 4. Les clés `["articles_by_date", invTs, id]` donnent un parcours
-   antéchronologique naturel ; l'API filtre/pagine par-dessus.
+   antéchronologique naturel ; l'API filtre et pagine par-dessus.
 
-### API
+## API
 
 | Endpoint            | Description                                                        |
 | ------------------- | ------------------------------------------------------------------ |
 | `GET /api/articles` | `q`, `org`, `kind`, `source`, `region`, `theme`, `limit`, `offset` |
-| `GET /api/sources`  | Organismes, sources actives, état de collecte, facettes            |
-| `GET /api/stats`    | Compteurs globaux, dernière synchro, planification                 |
-| `POST /api/collect` | Collecte manuelle (jeton `COLLECT_TOKEN` requis)                   |
+| `GET /api/sources`  | organismes, sources actives, état de collecte, facettes            |
+| `GET /api/stats`    | compteurs globaux, dernière synchronisation, planification         |
+| `POST /api/collect` | collecte manuelle, avec `Authorization: Bearer $COLLECT_TOKEN`     |
 
-## Sources suivies (22)
+## Sources
 
-**CNRS (1 flux)**
+**CNRS** : CNRS Le Journal, avec ses rubriques rattachées aux thèmes.
 
-- **CNRS Le Journal** (rubriques mappées vers les thèmes)
+**Organismes de recherche** : Inserm (actualités et salle de presse), CEA, CERN,
+ESA (actualités et Webb), IRD, IPGP, Gustave Roussy, Météo-France, Observatoire
+de Paris, Université Paris-Saclay.
 
-**Organismes de recherche (12 flux)**
+**Médias** : Futura Sciences (contenu sponsorisé filtré), The Conversation
+France, et des médias indépendants dont la structure a été vérifiée sur leurs
+mentions légales : Reporterre, Vert, Bon Pote, Splann!, AFIS, Sciences Humaines.
 
-- **Inserm** : actualités + salle de presse
-- **CERN** (édition française), **ESA** (actualités France et Webb, en anglais),
-  **IRD**, **IPGP**, **Gustave Roussy**, **Météo-France**, **Observatoire de
-  Paris**, **Université Paris-Saclay** : actualités
-- **CEA** : presse & médias
+**Déclarées mais désactivées**, faute de flux RSS exploitable : CNES, Institut
+Pasteur, INRAE, IFREMER, BRGM, ANSES, Institut Curie, Inria, Sorbonne
+Université, ainsi que les instituts et délégations régionales du CNRS, dont les
+anciens flux sont figés.
 
-**Médias (9 flux)**
+## Ajouter une source
 
-- **Futura Sciences** (contenu sponsorisé filtré via `exclude`)
-- **The Conversation France** (Atom)
-- **Médias indépendants** — structure vérifiée sur leurs mentions légales
-  (octobre 2026) : **Reporterre** (association, sans actionnaire), **Vert**
-  (détenu par ses fondateurs), **Bon Pote** (financé par ses lecteurs),
-  **Splann!** (association), **AFIS** (association), **Sciences Humaines**
-  (fondateur actionnaire majoritaire)
-- **Simon Courtois** (blog personnel du mainteneur)
+Tout passe par le registre [`collector/sources.ts`](collector/sources.ts) ;
+collecteur, API et interface prennent une nouvelle entrée en compte d'eux-mêmes.
 
-**Sans flux RSS public exploitable** (déclarés « à venir ») :
+- **Flux CNRS ou laboratoire** : une entrée
+  `cnrs({ id, kind, name, shortName, host, region?, themes? })`, avec
+  `kind: "laboratoire"` pour un labo.
+- **Nouvel organisme** : passer son entrée `ORGANIZATIONS` à `enabled: true`,
+  puis déclarer ses sources avec `org: "<id>"`. Le filtre par organisme apparaît
+  tout seul.
+- **Nouveaux thèmes** : compléter `THEMES` et `THEME_ALIASES`, qui associent les
+  catégories brutes des flux aux thèmes du site.
 
-- CNES, Institut Pasteur, INRAE, IFREMER, BRGM, ANSES, Institut Curie (vérifié
-  juillet 2026).
-- **Instituts et délégations du CNRS, flux national** (vérifié octobre 2026) :
-  les sites publient sur `/fr/news-list`, une vue sans flux ; l'ancien
-  `/fr/rss.xml` est figé entre 2019 et 2023. Sources déclarées mais désactivées.
-- **Inria** (figé depuis septembre 2024), **Sorbonne Université** (depuis
-  octobre 2023).
+## Structure
 
-## Étendre l'agrégateur
-
-Tout passe par le registre [`collector/sources.ts`](collector/sources.ts) :
-
-- **Ajouter un flux CNRS** : une entrée
-  `cnrs({ id, kind, name, shortName,
-  host, region?, themes? })` suffit —
-  collecteur, API et UI le prennent en compte automatiquement.
-- **Ajouter un laboratoire** : même chose avec `kind: "laboratoire"`.
-- **Ajouter un organisme (Inserm, Inria, CEA, …)** : passer son entrée
-  `ORGANIZATIONS` à `enabled: true` puis déclarer ses sources avec
-  `org: "<id>"`. Les filtres par organisme apparaissent d'eux-mêmes.
-- **Nouveaux thèmes** : compléter `THEMES` et `THEME_ALIASES` (mapping des
-  catégories brutes des flux vers les thèmes canoniques).
+```
+collector/
+  sources.ts       registre des organismes, flux, régions et thèmes
+  parser.ts        parsing RSS 2.0 / Atom
+  rss.ts           téléchargement conditionnel, normalisation, og:image, déduplication
+  cron.ts          Deno.cron et collecte initiale
+lib/
+  kv.ts            couche Deno KV (index antéchronologique, déduplication)
+  feed.ts          lecture filtrée et paginée, facettes, cache
+  search.ts        recherche plein texte, accents ignorés
+routes/
+  index.tsx        accueil et explorateur d'actualités
+  sources.tsx      tableau de bord des flux
+  api/[...path].ts API Hono montée sous /api
+islands/           explorateur interactif
+components/        habillage du site, carte article
+static/            CSS, polices auto-hébergées
+deploy/            service et timer systemd de déploiement automatique
+```
 
 ## Design
 
-Interface sombre « terminal scientifique » : fond quasi-noir teinté de vert,
-vert phosphore, IBM Plex Mono pour la donnée (badges, télémétrie, filtres),
-Space Grotesk pour les titres, grille de fond, repères `+` et tuiles
-typographiques pour les articles sans visuel. Fontes auto-hébergées (latin),
-aucune dépendance front externe.
+Interface sombre façon « terminal scientifique » : vert phosphore sur fond quasi
+noir, IBM Plex Mono pour la donnée, Space Grotesk pour les titres, tuiles
+typographiques pour les articles sans visuel. Polices auto-hébergées, aucune
+dépendance front externe.
+
+## Déploiement
+
+Le site tourne sur un serveur Fedora comme service systemd. Le timer
+`deploy/cnrs-flux-autodeploy.timer` vérifie toutes les 2 minutes si un commit
+est arrivé sur `main` ; si oui, le script `deploy/cnrs-flux-autodeploy` tire le
+code, construit, puis redémarre le service. Si le build échoue, l'ancienne
+version continue de tourner.
+
+## Contribuer
+
+Une source à proposer, un flux cassé, un bug ? Tout est expliqué dans
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Soutenir le projet
+
+CNRS//FLUX est gratuit, sans publicité ni pistage. S'il vous est utile, vous
+pouvez me soutenir sur [ko-fi.com/simon256px](https://ko-fi.com/simon256px).
+
+## Licence
+
+Code distribué sous [licence MIT](LICENSE). Les articles agrégés restent la
+propriété de leurs éditeurs : le site n'en affiche que le titre, le résumé
+publié dans le flux, l'image d'aperçu et un lien vers l'original.
